@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"time"
 
-	awsconfig "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/justinas/alice"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
@@ -78,32 +76,6 @@ func newFileDBClient(cfg config.DyOCSPConfig) (db.FileDBClient, error) {
 	return db.NewFileDBClient(cfg.CA, cfg.FileDBFile), nil
 }
 
-func newDynamoDBClient(cfg config.DyOCSPConfig) (db.DynamoDBClient, error) {
-	ca := cfg.CA
-	caTable := cfg.DynamoDBTableName
-	caGsi := cfg.DynamoDBCAGsi
-
-	aCfg, err := awsconfig.LoadDefaultConfig(context.TODO(),
-		awsconfig.WithRegion(cfg.DynamoDBRegion),
-		awsconfig.WithRetryMaxAttempts(cfg.DynamoDBRetryMaxAttempts),
-	)
-	if err != nil {
-		var dynamoDBClient db.DynamoDBClient
-		return dynamoDBClient, err
-	}
-
-	var client *dynamodb.Client
-	if cfg.DynamoDBEndpoint == "" {
-		client = dynamodb.NewFromConfig(aCfg)
-	} else {
-		client = dynamodb.NewFromConfig(aCfg, func(o *dynamodb.Options) {
-			o.BaseEndpoint = &cfg.DynamoDBEndpoint
-		})
-	}
-
-	return db.NewDynamoDBClient(client, &ca, &caTable, &caGsi, cfg.DynamoDBTimeout), nil
-}
-
 const (
 	cacheBatchRole   = "cache-generation"
 	CacheHandlerRole = "handle-ocsp-request"
@@ -138,8 +110,6 @@ func run(cfg config.DyOCSPConfig, responder *dyocsp.Responder) error {
 	switch cfg.DBType {
 	case config.FileDBType:
 		dbClient, err = newFileDBClient(cfg)
-	case config.DynamoDBType:
-		dbClient, err = newDynamoDBClient(cfg)
 	default:
 		err = config.MissingParameterError{Param: "db.<db-type>"}
 	}

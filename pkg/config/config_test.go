@@ -74,7 +74,7 @@ func convConfigYAMLToDyOCSPConfig(cfgYml ConfigYAML) DyOCSPConfig {
 	}
 
 	cfg.Port = cfgYml.HTTP.Port
-	cfg.Domain = cfgYml.HTTP.Domain
+	cfg.Addr = cfgYml.HTTP.Addr
 	cfg.ReadTimeout = *cfgYml.HTTP.ReadTimeout
 	cfg.WriteTimeout = *cfgYml.HTTP.WriteTimeout
 	cfg.ReadHeaderTimeout = *cfgYml.HTTP.ReadHeaderTimeout

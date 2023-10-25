@@ -31,7 +31,7 @@ type DyOCSPConfig struct {
 	DynamoDBTimeout          int
 	FileDBFile               string
 	Port                     string
-	Domain                   string
+	Addr                     string
 	ReadTimeout              int
 	WriteTimeout             int
 	ReadHeaderTimeout        int
@@ -81,7 +81,7 @@ type ConfigYAML struct {
 	} `yaml:"db"`
 	HTTP struct {
 		Port               string `yaml:"port"`
-		Domain             string `yaml:"domain"`
+		Addr               string `yaml:"addr"`
 		ReadTimeout        *int   `yaml:"read_timeout"`
 		WriteTimeout       *int   `yaml:"write_timeout"`
 		ReadHeaderTimeout  *int   `yaml:"read_header_timeout"`
@@ -389,7 +389,7 @@ func (y ConfigYAML) VerifyHTTPConfig(cfg DyOCSPConfig) (DyOCSPConfig, []error) {
 		nCfg.Port = y.HTTP.Port
 	}
 	// HTTP.Domain               Optional
-	nCfg.Domain = y.HTTP.Domain
+	nCfg.Addr = y.HTTP.Addr
 	// HTTP.ReadTimeout          Optional
 	nCfg.ReadTimeout = specOrDefInt(y.HTTP.ReadTimeout, ReadTimeOutDefault)
 	// HTTP.WriteTimeout         Optional

@@ -160,7 +160,7 @@ func run(cfg config.DyOCSPConfig, responder *dyocsp.Responder) error {
 		dyocsp.WithHandlerLogger(&hLogger),
 	)
 
-	host := net.JoinHostPort(cfg.Domain, cfg.Port)
+	host := net.JoinHostPort(cfg.Addr, cfg.Port)
 	server := dyocsp.CreateHTTPServer(
 		host,
 		cfg,

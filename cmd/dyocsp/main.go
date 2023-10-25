@@ -8,8 +8,10 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"time"
+	"syscall"
 
 	"github.com/justinas/alice"
 	"github.com/rs/zerolog/hlog"
@@ -142,7 +144,19 @@ func run(cfg config.DyOCSPConfig, responder *dyocsp.Responder) error {
 	}
 
 	// Run batch generating caches
-	go batch.Run(rootCtx)
+	go batch.Run(rootCtx, false)
+
+	// Regenerate caches on SIGUSR1 signal
+	signals := make(chan os.Signal, 1)
+	go func() {
+		for signal := range signals {
+			switch signal {
+			case syscall.SIGUSR1:
+				batch.Run(rootCtx, true)
+			}
+		}
+	}()
+	signal.Notify(signals, syscall.SIGUSR1)
 
 	// Create Server
 	hLogger := log.Logger.With().Str("role", CacheHandlerRole).Logger()

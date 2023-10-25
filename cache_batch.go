@@ -278,23 +278,6 @@ func (c *CacheBatch) RunOnce(ctx context.Context) []cache.ResponseCache {
 	return signedCaches
 }
 
-func (c *CacheBatch) syncWithWaitDuration(now time.Time) time.Duration {
-	waitDur := c.interval
-	nextUpdate := c.nextUpdate
-	if now.Before(nextUpdate) {
-		waitDur = (waitDur + nextUpdate.Sub(now)) - c.delay
-	} else if now.After(nextUpdate) {
-		waitDur = (waitDur - now.Sub(nextUpdate)) - c.delay
-		if waitDur < 0 {
-			waitDur = 0
-		}
-	} else {
-		waitDur -= c.delay
-	}
-
-	return waitDur
-}
-
 func (c *CacheBatch) logBatchSummary(ctx context.Context, start time.Time) {
 	logger := zerolog.Ctx(ctx)
 
@@ -341,7 +324,7 @@ func (c *CacheBatch) waitForNextUpdate(ctx context.Context, waitDur time.Duratio
 //     or the duration of batch processing.
 //   - Update Next Update.
 //   - Wait for next update.
-func (c *CacheBatch) Run(ctx context.Context) {
+func (c *CacheBatch) Run(ctx context.Context, runOnce bool) {
 	for {
 		startTime := c.now()
 
@@ -366,14 +349,17 @@ func (c *CacheBatch) Run(ctx context.Context) {
 		// Summury of this loop batch
 		c.logBatchSummary(ctx, startTime)
 
-		waitDur := c.syncWithWaitDuration(c.now())
+		c.nextUpdate = startTime.Add(c.interval - c.delay)
+		waitDur := c.nextUpdate.Sub(startTime)
 
-		// Update nextUpdate
-		c.nextUpdate = c.nextUpdate.Add(c.interval)
-
-		// Wait for next update
-		c.waitForNextUpdate(ctx, waitDur)
+		if !runOnce {
+			c.waitForNextUpdate(ctx, waitDur)
+		}
 
 		c.batchSerial++
+
+		if runOnce {
+			break
+		}
 	}
 }

@@ -275,7 +275,7 @@ func (r *Responder) verifyIssuerSignedResponder() error {
 }
 
 func (r *Responder) verifyNotExpired(nowT time.Time) error {
-	if r.rCert.NotAfter.Compare(nowT) < 0 {
+	if r.rCert.NotAfter.Before(nowT) {
 		return invalidPKIResourceError{responderCert, "date of Not After is past."}
 	}
 
@@ -283,7 +283,7 @@ func (r *Responder) verifyNotExpired(nowT time.Time) error {
 }
 
 func (r *Responder) verifyRCertBeforeDateNotFuture(nowT time.Time) error {
-	if nowT.Compare(r.rCert.NotBefore) < 0 {
+	if nowT.Before(r.rCert.NotBefore) {
 		return invalidPKIResourceError{responderCert, "date of Not Before is future."}
 	}
 

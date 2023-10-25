@@ -280,15 +280,15 @@ func (c *CacheBatch) RunOnce(ctx context.Context) []cache.ResponseCache {
 
 func (c *CacheBatch) syncWithWaitDuration(now time.Time) time.Duration {
 	waitDur := c.interval
-	switch r := now.Compare(c.nextUpdate); r {
-	case -1:
-		waitDur = (waitDur + c.nextUpdate.Sub(now)) - c.delay
-	case 1:
-		waitDur = (waitDur - now.Sub(c.nextUpdate)) - c.delay
+	nextUpdate := c.nextUpdate
+	if now.Before(nextUpdate) {
+		waitDur = (waitDur + nextUpdate.Sub(now)) - c.delay
+	} else if now.After(nextUpdate) {
+		waitDur = (waitDur - now.Sub(nextUpdate)) - c.delay
 		if waitDur < 0 {
 			waitDur = 0
 		}
-	default:
+	} else {
 		waitDur -= c.delay
 	}
 

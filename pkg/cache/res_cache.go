@@ -33,7 +33,7 @@ func (e ResponseCacheNotCreatedError) Error() string {
 func revokedAtFromEntry(entry db.CertificateEntry) time.Time {
 	var revokedAt time.Time
 
-	if entry.RevDate.Compare(time.Time{}) != 0 {
+	if !entry.RevDate.Equal(time.Time{}) {
 		revokedAt = entry.RevDate
 	} else {
 		revokedAt = entry.ExpDate

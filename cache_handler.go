@@ -249,7 +249,7 @@ func (c CacheHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	nowT := c.now()
-	if cmp := nowT.Compare(cache.Template().NextUpdate); cmp > 0 {
+	if nowT.After(cache.Template().NextUpdate) {
 		logger.Error().Msgf("nextUpdate of found cache is set in the past.")
 		_, err = w.Write(ocsp.UnauthorizedErrorResponse)
 		if err != nil {

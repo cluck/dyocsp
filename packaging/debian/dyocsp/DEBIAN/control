@@ -1,0 +1,9 @@
+Package: dyocsp
+Version: 0.2.7-1
+Section: net
+Priority: optional
+Architecture: all
+Maintainer: Claudio Luck <claudio.luck@datact.ch>
+Description: DyOCSP - Flexible DB OCSP Responder
+  DyOCSP is an OCSP responder for private CA, and an
+  implementation of RFC 6960 and RFC 5019.
